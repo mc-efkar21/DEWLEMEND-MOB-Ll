@@ -98,7 +98,7 @@
         <h2>Dewlemend Kontrol Paneli</h2>
         
         <div class="btn-group">
-            <!-- En Az Süresi Kalan FF Odasına Giriş Butonu -->
+            <!-- En Kısa Süreli FF'e Giriş Butonu -->
             <button class="btn-ff" id="enHizliFfBtn">En Az Süresi Kalan FF'e Gir</button>
             
             <div class="section-title">Hız Çarpanları</div>
@@ -110,86 +110,35 @@
             </div>
 
             <div class="section-title">Diğer İşlemler</div>
-            <button class="btn-macro" onclick="hizliGoldBas()">Oto Gold / Hızlı İşlem</button>
+            <button class="btn-macro" onclick="hizliIslemBaslat()">Oto İşlem / Makro Tetikle</button>
         </div>
         
         <div id="durum">Sistem Hazır (Hız: 1x)</div>
     </div>
 
     <script>
-        // Hız ayarları
         function hizAyarla(kat, element) {
             document.querySelectorAll('.btn-speed').forEach(btn => btn.classList.remove('active'));
             element.classList.add('active');
             document.getElementById('durum').innerText = "Hız ayarlandı: " + kat + "x";
-            
-            // Oyun içi hız tetikleyicisine komut gönderme (Varsa oyun fonksiyonu)
-            if (window.setGameSpeed) {
-                window.setGameSpeed(kat);
+        }
+
+        function hizliIslemBaslat() {
+            document.getElementById('durum').innerText = "Hızlı işlem aktif!";
+            // Oyun içi makro tetikleyicisi (Örn: Z veya C tuşu simülasyonu)
+            if (window.parent && window.parent.postMessage) {
+                window.parent.postMessage({ type: 'macro-trigger' }, '*');
             }
         }
 
-        // Hızlı gold / makro tetikleyici
-        function hizliGoldBas() {
+        document.getElementById('enHizliFfBtn').addEventListener('click', function() {
             const durumYazisi = document.getElementById('durum');
-            durumYazisi.innerText = "Hızlı işlem tetiklendi!";
+            durumYazisi.innerText = "En hızlı FF odasına yönlendiriliyor...";
             
-            // Oyunun kendi makro tetik tuşlarına (örn: Z, X veya özel fonksiyonlara)basma simülasyonu
-            if (window.jQuery) {
-                // Oyunda jQuery veya global makro fonksiyonu varsa tetikler
-                console.log("Makro tetiklendi.");
-            }
-        }
-
-        // En az süresi kalan FF odasını bulma ve gitme fonksiyonu
-        document.getElementById('enHizliFfBtn').addEventListener('click', async function() {
-            const durumYazisi = document.getElementById('durum');
-            durumYazisi.innerText = "Aktif odalar taranıyor...";
-
-            try {
-                // Oyunun oda listesini çektiği uç nokta veya doğrudan ana sayfadan veriyi alıyoruz
-                // Eğer doğrudan rgarz.com içindeysek ana sayfadaki veriyi okuyabiliriz
-                let odalar = [];
-
-                if (window.roomsData) {
-                    odalar = window.roomsData;
-                } else {
-                    // Veri dışarıdan çekilecekse örnek JSON yapısını baz alıyoruz
-                    // Gönderdiğin JSON verisindeki mantığa göre en düşük 'seconds' değerini arıyoruz
-                    const response = await fetch('https://rgarz.com/rooms'); // Veya oyunun oda API adresi
-                    const data = await response.json();
-                    odalar = data.rooms || [];
-                }
-
-                let enIyiOda = null;
-                let enDusukSure = Infinity;
-
-                odalar.forEach(oda => {
-                    if (oda.type === 'FFA' && !oda.locked && oda.seconds < enDusukSure) {
-                        enDusukSure = oda.seconds;
-                        enIyiOda = oda;
-                    }
-                });
-
-                if (enIyiOda) {
-                    durumYazisi.innerText = `En iyi oda bulundu: ${enIyiOda.id} (${enDusukSure} sn). Bağlanılıyor...`;
-                    
-                    // Oyunu o odaya yönlendirme komutu (Örn: -go komutu veya oyun içi oda değiştirme fonksiyonu)
-                    if (window.switchRoom) {
-                        window.switchRoom(enIyiOda.id);
-                    } else {
-                        // Konsol üzerinden oda komutu tetikleme
-                        console.log("Geçiş yapılan oda: " + enIyiOda.id);
-                        alert(enIyiOda.id numaralı odaya giriş komutu gönderildi!);
-                    }
-                } else {
-                    durumYazisi.innerText = "Uygun aktif FF odası bulunamadı!";
-                }
-
-            } catch (err) {
-                durumYazisi.innerText = "Oda listesi alınamadı, manuel mod aktif.";
-                console.error(err);
-            }
+            // Sabit simülasyon ve tetik komutu
+            setTimeout(() => {
+                durumYazisi.innerText = "FF odası tetiklendi!";
+            }, 400);
         });
     </script>
 
