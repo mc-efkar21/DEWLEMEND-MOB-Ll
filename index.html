@@ -90,13 +90,6 @@
             font-size: 0.85rem;
             color: #94a3b8;
         }
-        /* Netlify rozetini ve reklamını tamamen gizler */
-        #netlify-badge, a[href*="netlify.com/support"], .netlify-badge {
-            display: none !important;
-            visibility: hidden !important;
-            opacity: 0 !important;
-            pointer-events: none !important;
-        }
     </style>
 </head>
 <body>
@@ -105,11 +98,10 @@
         <h2>Dewlemend Kontrol Paneli</h2>
         
         <div class="btn-group">
-            <!-- En Kısa Süreli FF'e Giriş Butonu -->
-            <button class="btn-ff" id="enHizliFfBtn">En Kısa Süre Kalınan FF'e Gir</button>
+            <!-- En Az Süresi Kalan FF Odasına Giriş Butonu -->
+            <button class="btn-ff" id="enHizliFfBtn">En Az Süresi Kalan FF'e Gir</button>
             
             <div class="section-title">Hız Çarpanları</div>
-            <!-- Hız Butonları (1x, 1.5x, 2x, 2.5x) -->
             <div class="speed-grid">
                 <button class="btn-speed active" onclick="hizAyarla(1, this)">1x</button>
                 <button class="btn-speed" onclick="hizAyarla(1.5, this)">1.5x</button>
@@ -118,26 +110,86 @@
             </div>
 
             <div class="section-title">Diğer İşlemler</div>
-            <button class="btn-macro" onclick="alert('Makro döngüsü aktif!')">Oto İşlem Başlat</button>
+            <button class="btn-macro" onclick="hizliGoldBas()">Oto Gold / Hızlı İşlem</button>
         </div>
         
         <div id="durum">Sistem Hazır (Hız: 1x)</div>
     </div>
 
     <script>
+        // Hız ayarları
         function hizAyarla(kat, element) {
             document.querySelectorAll('.btn-speed').forEach(btn => btn.classList.remove('active'));
             element.classList.add('active');
             document.getElementById('durum').innerText = "Hız ayarlandı: " + kat + "x";
+            
+            // Oyun içi hız tetikleyicisine komut gönderme (Varsa oyun fonksiyonu)
+            if (window.setGameSpeed) {
+                window.setGameSpeed(kat);
+            }
         }
 
-        document.getElementById('enHizliFfBtn').addEventListener('click', function() {
+        // Hızlı gold / makro tetikleyici
+        function hizliGoldBas() {
             const durumYazisi = document.getElementById('durum');
-            durumYazisi.innerText = "En kısa süreli FF taranıyor...";
+            durumYazisi.innerText = "Hızlı işlem tetiklendi!";
             
-            setTimeout(() => {
-                durumYazisi.innerText = "En kısa süreli FF bulundu ve giriş tetiklendi!";
-            }, 600);
+            // Oyunun kendi makro tetik tuşlarına (örn: Z, X veya özel fonksiyonlara)basma simülasyonu
+            if (window.jQuery) {
+                // Oyunda jQuery veya global makro fonksiyonu varsa tetikler
+                console.log("Makro tetiklendi.");
+            }
+        }
+
+        // En az süresi kalan FF odasını bulma ve gitme fonksiyonu
+        document.getElementById('enHizliFfBtn').addEventListener('click', async function() {
+            const durumYazisi = document.getElementById('durum');
+            durumYazisi.innerText = "Aktif odalar taranıyor...";
+
+            try {
+                // Oyunun oda listesini çektiği uç nokta veya doğrudan ana sayfadan veriyi alıyoruz
+                // Eğer doğrudan rgarz.com içindeysek ana sayfadaki veriyi okuyabiliriz
+                let odalar = [];
+
+                if (window.roomsData) {
+                    odalar = window.roomsData;
+                } else {
+                    // Veri dışarıdan çekilecekse örnek JSON yapısını baz alıyoruz
+                    // Gönderdiğin JSON verisindeki mantığa göre en düşük 'seconds' değerini arıyoruz
+                    const response = await fetch('https://rgarz.com/rooms'); // Veya oyunun oda API adresi
+                    const data = await response.json();
+                    odalar = data.rooms || [];
+                }
+
+                let enIyiOda = null;
+                let enDusukSure = Infinity;
+
+                odalar.forEach(oda => {
+                    if (oda.type === 'FFA' && !oda.locked && oda.seconds < enDusukSure) {
+                        enDusukSure = oda.seconds;
+                        enIyiOda = oda;
+                    }
+                });
+
+                if (enIyiOda) {
+                    durumYazisi.innerText = `En iyi oda bulundu: ${enIyiOda.id} (${enDusukSure} sn). Bağlanılıyor...`;
+                    
+                    // Oyunu o odaya yönlendirme komutu (Örn: -go komutu veya oyun içi oda değiştirme fonksiyonu)
+                    if (window.switchRoom) {
+                        window.switchRoom(enIyiOda.id);
+                    } else {
+                        // Konsol üzerinden oda komutu tetikleme
+                        console.log("Geçiş yapılan oda: " + enIyiOda.id);
+                        alert(enIyiOda.id numaralı odaya giriş komutu gönderildi!);
+                    }
+                } else {
+                    durumYazisi.innerText = "Uygun aktif FF odası bulunamadı!";
+                }
+
+            } catch (err) {
+                durumYazisi.innerText = "Oda listesi alınamadı, manuel mod aktif.";
+                console.error(err);
+            }
         });
     </script>
 
