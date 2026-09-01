@@ -30,21 +30,33 @@
         }
         h2 {
             text-align: center;
-            margin-bottom: 20px;
-            font-size: 1.25rem;
+            margin-bottom: 15px;
+            font-size: 1.2rem;
             color: #38bdf8;
+        }
+        .section-title {
+            font-size: 0.9rem;
+            color: #94a3b8;
+            margin: 12px 0 6px 0;
+            font-weight: bold;
         }
         .btn-group {
             display: flex;
             flex-direction: column;
-            gap: 12px;
+            gap: 10px;
+        }
+        /* Hız Butonları İçin Yan Yana Izgara */
+        .speed-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 6px;
         }
         button {
             width: 100%;
-            padding: 14px;
+            padding: 12px;
             border: none;
             border-radius: 8px;
-            font-size: 1rem;
+            font-size: 0.95rem;
             font-weight: bold;
             cursor: pointer;
             transition: transform 0.1s ease, background-color 0.2s;
@@ -59,12 +71,19 @@
         .btn-ff:hover {
             background-color: #dc2626;
         }
+        .btn-speed {
+            background-color: #334155;
+            color: #f8fafc;
+            padding: 10px 5px;
+            font-size: 0.85rem;
+        }
+        .btn-speed.active {
+            background-color: #38bdf8;
+            color: #0f172a;
+        }
         .btn-macro {
             background-color: #3b82f6;
             color: white;
-        }
-        .btn-macro:hover {
-            background-color: #2563eb;
         }
         #durum {
             margin-top: 15px;
@@ -78,24 +97,41 @@
 
     <div class="container">
         <h2>Dewlemend Kontrol Paneli</h2>
+        
         <div class="btn-group">
             <!-- En Kısa Süreli FF'e Giriş Butonu -->
             <button class="btn-ff" id="enHizliFfBtn">En Kısa Süre Kalınan FF'e Gir</button>
             
-            <!-- Diğer Makro / Otomasyon Butonları Buraya Eklenebilir -->
-            <button class="btn-macro" onclick="alert('Makro döngüsü aktif!')">Oto Altın / İşlem Başlat</button>
+            <div class="section-title">Hız Çarpanları</div>
+            <!-- Hız Butonları (1x, 1.5x, 2x, 2.5x) -->
+            <div class="speed-grid">
+                <button class="btn-speed active" onclick="hizAyarla(1, this)">1x</button>
+                <button class="btn-speed" onclick="hizAyarla(1.5, this)">1.5x</button>
+                <button class="btn-speed" onclick="hizAyarla(2, this)">2x</button>
+                <button class="btn-speed" onclick="hizAyarla(2.5, this)">2.5x</button>
+            </div>
+
+            <div class="section-title">Diğer İşlemler</div>
+            <button class="btn-macro" onclick="alert('Makro döngüsü aktif!')">Oto İşlem Başlat</button>
         </div>
-        <div id="durum">Sistem Hazır</div>
+        
+        <div id="durum">Sistem Hazır (Hız: 1x)</div>
     </div>
 
     <script>
+        function hizAyarla(kat, element) {
+            // Aktif buton görselini değiştirme
+            document.querySelectorAll('.btn-speed').forEach(btn => btn.classList.remove('active'));
+            element.classList.add('active');
+            
+            document.getElementById('durum').innerText = "Hız ayarlandı: " + kat + "x";
+        }
+
         document.getElementById('enHizliFfBtn').addEventListener('click', function() {
             const durumYazisi = document.getElementById('durum');
             durumYazisi.innerText = "En kısa süreli FF taranıyor...";
             
-            // Oyun içi FF sayaç yapısına göre elementleri yakalama mantığı
             setTimeout(() => {
-                // Örnek simülasyon (Oyun yapına göre buradaki seçici özelleştirilebilir)
                 durumYazisi.innerText = "En kısa süreli FF bulundu ve giriş tetiklendi!";
             }, 600);
         });
