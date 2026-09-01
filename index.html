@@ -45,7 +45,6 @@
             flex-direction: column;
             gap: 10px;
         }
-        /* Hız Butonları İçin Yan Yana Izgara */
         .speed-grid {
             display: grid;
             grid-template-columns: repeat(4, 1fr);
@@ -91,6 +90,13 @@
             font-size: 0.85rem;
             color: #94a3b8;
         }
+        /* Netlify rozetini ve reklamını tamamen gizler */
+        #netlify-badge, a[href*="netlify.com/support"], .netlify-badge {
+            display: none !important;
+            visibility: hidden !important;
+            opacity: 0 !important;
+            pointer-events: none !important;
+        }
     </style>
 </head>
 <body>
@@ -120,10 +126,8 @@
 
     <script>
         function hizAyarla(kat, element) {
-            // Aktif buton görselini değiştirme
             document.querySelectorAll('.btn-speed').forEach(btn => btn.classList.remove('active'));
             element.classList.add('active');
-            
             document.getElementById('durum').innerText = "Hız ayarlandı: " + kat + "x";
         }
 
